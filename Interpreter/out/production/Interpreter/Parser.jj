@@ -1,0 +1,180 @@
+PARSER_BEGIN(Parser)
+
+
+/** ID lister. */
+//import AST.*;
+//import values.*;
+import java.util.*;
+public class Parser {}
+
+PARSER_END(Parser)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\r"
+| "\n"
+}
+
+TOKEN :
+{
+  < Num: (["0"-"9"]) + >
+  |
+  < PLUS : "+" >
+  |
+  < SMICOL : ";" >
+  |
+  < MINUS : "-">
+  |
+  < TIMES : "*">
+  |
+  < DIV : "/">
+  |
+  < EON : "^">
+  |
+  < COMMA : ",">
+  |
+  < EEL: ";;">
+  |
+  < LPAR : "(" >
+  |
+  < RPAR : ")" >
+  |
+  < EQ: "=" >
+  |
+  < DBLEQ: "==" >
+  |
+  < LET: "let" >
+  |
+  < IN: "in" >
+  |
+  < END: "end" >
+  |
+  < FUN: "fun" >
+  |
+  < NEW: "new" >
+  |
+  < DEREF: "!" >
+  |
+  < ASSIGN: ":=" >
+  |
+  < RARW: "->" >
+  |
+  < BOOL: "true" | "false" >
+  |
+  < Id: ["a"-"z","A"-"Z"] ( ["a"-"z","A"-"Z","0"-"9"] )* >
+
+}
+
+ASTNode Start():
+{ 
+    ASTNode node; 
+}
+{
+	node = EM() <EEL>
+
+    { return node; }
+}
+
+ASTNode EM() :
+{
+    ASTNode e1, e2;
+}
+{
+    e1 = E() (<SMICOL> e2 = EM() { e1 = new ASTSeq(e1, e2); })*
+
+    { return e1; }
+}
+
+ASTNode E() :
+{ 
+    Token op;
+    ASTNode ea1, ea2; 
+}
+{
+    ea1 = EA() (<DBLEQ> ea2 = EA() {ea1 = new ASTEquals(ea1, ea2); })? 
+
+    { return ea1; }
+}
+
+ASTNode EA() :
+{ 
+    Token op;
+    ASTNode t1, t2; 
+}
+{
+    t1 = T() ( 
+        ( 
+            ( <PLUS> t2 = EA() { t1 = new ASTPlus(t1,t2); } ) 
+            | ( <MINUS> t2 = EA() { t1 = new ASTSub(t1,t2); } ) 
+        )* 
+
+    )
+
+    { return t1; } 
+}
+
+ASTNode T() :
+{ 
+    Token op;
+    ASTNode f1, f2;
+    List<ASTNode> al;
+}
+{
+
+     //(<LPAR> f2 = F() <RPAR> {f1 = new ASTCall(f1, f2);}) *
+    f1 = F() ( 
+        ( 
+                ( <LPAR> f2 = EM() <RPAR> { f1 = new ASTCall(f1, f2); } )
+            |   ( <ASSIGN> f2 = E() { f1 = new ASTAssign(f1, f2); })
+            |   (
+                    ( <TIMES> f2 = F() { f1 = new ASTMul(f1,f2); } ) 
+                    | ( <DIV> f2 = F() { f1 = new ASTDiv(f1,f2); } ) 
+                )*
+        )  
+    )
+
+    { return f1; }
+}
+
+ASTNode F():{ Token tok; ASTNode node; ASTNode node1; ASTNode node2; }
+{
+	(tok = <Num> 
+        { node = new ASTNum(Integer.parseInt(tok.image)); }
+	
+	| tok = <Id>
+   	    { node = new ASTId(new String(tok.image)); }
+
+    | tok = <BOOL>
+        { node = new ASTBool(new String(tok.image)); }
+
+	| <LET> tok = <Id> <EQ> node1 = EM() <IN> node2 = EM() <END> 
+        { node = new ASTLet(new String(tok.image), node1, node2); }
+
+    | <FUN> tok = <Id> <RARW> node1 = EM() <END>
+        { node = new ASTFunction(new String(tok.image), node1); }
+
+    | <DEREF> node1 = F() 
+        { node = new ASTDeref(node1); }
+
+    | <NEW>  node1 = F() 
+        { node = new ASTNew(node1); }
+
+    | <LPAR> node = EM() <RPAR>
+
+  )
+
+  { return node; }
+}
+
+List<ASTNode> AL():
+{
+  List<ASTNode> al = new ArrayList<ASTNode>();
+  ASTNode e;
+}
+{
+  (e = E() {al.add(e);} ( <COMMA> e = E() { al.add(e); } )* )?
+
+  {return al;}
+}

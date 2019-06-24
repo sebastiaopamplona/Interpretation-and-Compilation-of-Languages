@@ -1,0 +1,176 @@
+let x = 10 in 
+	let f = fun k -> k+1 end in 
+		f(1) 
+	end 
+end;; (2)
+-----------------------------------------
+(new 3) := 6;; (6)
+-----------------------------------------
+let a = new 5 in 
+	a := !a + 1; 
+	!a 
+end;; (6)
+-----------------------------------------
+let x = new 10 in 
+	let s = new 0 in 
+		while !x > 0 do 
+			s := !s + !x; 
+			x := !x - 1 
+		end
+	end;
+	!s
+end;; (55)
+-----------------------------------------
+let f = fun n,b -> 
+		let x = new n in 
+			let s = new b in 
+				while !x>0 do 
+					s := !s + !x; 
+					x := !x -1 
+				end; 
+				!s 
+			end 
+		end 
+	end 
+in 
+	f(10,0) + f(100, 20) 
+end;; (5125)
+-----------------------------------------
+let k = 2 in	
+	let a = new(k) in
+		!a + 2
+	end
+end;; (4)
+-----------------------------------------
+let f:Fun(int,int)int = fun n:int, b:int ->
+			let
+				x:Ref(int) = new n
+				s:Ref(int) = new b
+			in
+				while !x > 0 do
+					s := !s + !x;
+					x := !x -1
+				end;
+				!s
+			end
+		end
+in
+	f(10,0)+f(100,20)
+end;; (5125)
+-----------------------------------------
+let f:Fun(Ref(int))int = fun x:Ref(int) -> 
+						!x+1
+					end
+in
+	f(new (1))
+end;; (2)	
+-----------------------------------------
+let
+	g:Fun(int)int = fun x:int ->
+		x+1
+	end
+in
+	g(1)
+end;; (2)	
+-----------------------------------------
+let
+	g:Fun(int, int)int = fun x:int, y:int ->
+		x+y
+	end
+in
+	g(1, 5)
+end;; (6)
+-----------------------------------------
+let
+	g:Fun(int)int = fun x:int ->
+		x+1
+	end
+in
+	let
+		f:Fun(Fun(int)int, int)int = fun g1:Fun(int)int, y:int ->
+			g1(10) + y
+		end
+	in
+		f(g, 1)
+	end
+end;; (12)
+-----------------------------------------
+let
+	g:Fun(int)int = fun x:int -> 
+		x+1
+	end
+	f:Fun(Fun(int)int, int)int = fun g1:Fun(int)int, y:int -> 
+		g1(10) + y 
+	end
+in
+	f(g, 1)
+end;; (12)
+-----------------------------------------
+let 
+	f:Fun(Ref(int))bool = fun x:Ref(int) ->
+		while !x > 0 do
+			x := !x - 1
+		end
+	end
+in
+	f(new(3))
+end;;
+-----------------------------------------
+let
+	ifgt:Fun(int, int)bool = fun x:int, y:int ->
+		x > y
+	end
+in
+	ifgt(2, 3)
+end;;
+-----------------------------------------
+let
+	ifgt:Fun(int, int)bool = fun x:int, y:int ->
+		x > y
+	end
+in
+	ifgt(true, 3)
+end;; 
+-----------------------------------------
+let 
+	x:int = 1
+in
+	let 
+		y:int = 2
+	in
+		let
+			z:int = 3
+		in
+			x + y + z
+		end
+	end
+end;;
+-----------------------------------------
+let
+	x:int = 1
+in
+	let 
+		y:int = 2 + x
+	in
+		x + y
+	end + x
+end;;
+-----------------------------------------
+let
+	x:int = 1
+in
+	let 
+		y:int = 2
+	in
+		let 
+			f:Fun(int)int = fun z:int -> z + x + y end
+		in
+			f(10)
+		end
+	end
+end;;
+	
+
+	
+		
+  
